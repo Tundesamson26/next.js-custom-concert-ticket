@@ -1,17 +1,21 @@
 import Head from "next/head";
 import Link from "next/link";
+import { useRouter } from "next/router";
 import { useState } from "react";
+import { getXataClient } from "../src/xata";
 import { CloudinaryContext, Transformation, Image } from "cloudinary-react";
 import { Concert } from "../components/Concert";
 import ticket from "../utils/ticket.json";
 
 
-export default function Home() {
+export default function Home(concert) {
+  console.log(concert)
+  // const router = useRouter();
   const [tab, setTab] = useState("ticket");
   const [imageId, setImageId] = useState(null);
   const [formData, setFormData] = useState({
-    message: "",
-    name: "",
+    concert_name: "",
+    artist: "",
     publicId: null,
     error: false,
   });
@@ -21,8 +25,28 @@ export default function Home() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const submit = () => {
+    fetch("/api/add-concert", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        concert_name,
+        artist,
+      }),
+    }).then(() => {
+        setFormData({
+          concert_name: "",
+          artist: "",
+        });
+      })
+      .catch(() => alert("An error occured"));
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
+    submit();
     if (imageId) {
       setShowCard(true);
     } else {
@@ -96,8 +120,8 @@ export default function Home() {
             <textarea
               rows="4"
               required
-              name="message"
-              value={formData.message}
+              name="concert_name"
+              value={formData.concert_name}
               onChange={handleChange}
               maxLength={140}
               className="w-full border-[#B7B3B3] border rounded-sm p-2"
@@ -107,8 +131,8 @@ export default function Home() {
             <label className="block text-sm text-[#535353] mb-2">Artist</label>
             <input
               required
-              name="name"
-              value={formData.name}
+              name="artist"
+              value={formData.artist}
               onChange={handleChange}
               className="w-full h-10 border-[#B7B3B3] border rounded-sm p-2"
             />
@@ -121,8 +145,8 @@ export default function Home() {
         {showCard && (
           <div className="mt-10">
             <Concert
-              message={formData.message}
-              name={formData.name}
+              concert={formData.concert_name}
+              artist={formData.artist}
               publicId={formData.publicId}
             />
           </div>
@@ -130,4 +154,14 @@ export default function Home() {
       </main>
     </div>
   );
+}
+
+export async function getServerSideProps() {
+  const xata = await getXataClient();
+  const concerts = await xata.db.concert.getAll();
+  return {
+    props: {
+      concert: concerts.map(({ replace, ...concert }) => concert),
+    },
+  };
 }

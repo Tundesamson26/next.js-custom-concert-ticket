@@ -1,7 +1,7 @@
 import { CloudinaryContext, Transformation, Image } from "cloudinary-react";
 import { useEffect, useRef, useState } from 'react'; 
 
-export const Concert = ({ message, name, publicId }) => {
+export const Concert = ({ concert_name, artist, publicId }) => {
 
  const ref = useRef(null);
  const [url, setURL] = useState("");
@@ -32,7 +32,7 @@ export const Concert = ({ message, name, publicId }) => {
               fontFamily: "Neucha",
               fontSize: 150,
               fontWeight: "bold",
-              text: message,
+              text: concert_name,
               textAlign: "center",
             }}
             width="1300"
@@ -45,7 +45,7 @@ export const Concert = ({ message, name, publicId }) => {
               fontFamily: "Dancing Script",
               fontSize: 100,
               fontWeight: "bold",
-              text: `Artist: ${name}`,
+              text: `Artist: ${artist}`,
             }}
           />
           <Transformation
